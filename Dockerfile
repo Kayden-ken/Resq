@@ -21,22 +21,22 @@ RUN apt-get update && apt-get install -y \
 # Enable Apache rewrite
 RUN a2enmod rewrite
 
+# ⭐ IMPORTANT: Allow Laravel .htaccess to work
+RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www/html
 
-# Copy project
 COPY . .
 
-# Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
 # Point Apache to Laravel public folder
 RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
 
-# Create all Laravel directories
+# Create Laravel directories
 RUN mkdir -p \
     storage/framework/cache/data \
     storage/framework/sessions \
@@ -44,15 +44,9 @@ RUN mkdir -p \
     storage/logs \
     bootstrap/cache
 
-# Set permissions
-RUN chmod -R 775 storage bootstrap/cache \
-    && chown -R www-data:www-data storage bootstrap/cache
-
-# Laravel optimizations
-RUN php artisan storage:link || true
-RUN php artisan config:clear || true
-RUN php artisan cache:clear || true
-RUN php artisan view:clear || true
+# Permissions
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
 EXPOSE 80
 
