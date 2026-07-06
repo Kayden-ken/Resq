@@ -67,19 +67,19 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($requests as $request)
+            @forelse($requests as $emergencyReq)
             <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
-                <td class="py-4 px-6 font-medium text-slate-800">{{ $request->incident_number }}</td>
+                <td class="py-4 px-6 font-medium text-slate-800">{{ $emergencyReq->incident_number }}</td>
                 <td class="py-4 px-6">
                     <span class="px-3 py-1 rounded-full text-xs font-medium bg-red-50 text-red-600">
-                        {{ $request->emergencyType?->name ?? 'Unknown' }}
+                        {{ $emergencyReq->emergencyType?->name ?? 'Unknown' }}
                     </span>
                 </td>
-                <td class="py-4 px-6 text-slate-600">{{ $request->requester->name ?? 'N/A' }}</td>
-                <td class="py-4 px-6 text-slate-500 truncate max-w-[150px]">{{ $request->address ?? 'N/A' }}</td>
+                <td class="py-4 px-6 text-slate-600">{{ $emergencyReq->requester->name ?? 'N/A' }}</td>
+                <td class="py-4 px-6 text-slate-500 truncate max-w-[150px]">{{ $emergencyReq->address ?? 'N/A' }}</td>
                 <td class="py-4 px-6">
                     @php
-                    $statusClass = match($request->status) {
+                    $statusClass = match($emergencyReq->status) {
                         'pending' => 'bg-yellow-100 text-yellow-700',
                         'accepted' => 'bg-blue-100 text-blue-700',
                         'responding' => 'bg-purple-100 text-purple-700',
@@ -89,14 +89,14 @@
                         default => 'bg-gray-100'
                     };
                     @endphp
-                    <span class="px-3 py-1 rounded-full text-xs font-medium {{ $statusClass }}">{{ ucfirst($request->status) }}</span>
+                    <span class="px-3 py-1 rounded-full text-xs font-medium {{ $statusClass }}">{{ ucfirst($emergencyReq->status) }}</span>
                 </td>
-                <td class="py-4 px-6 text-slate-500">{{ $request->created_at->format('M d, H:i') }}</td>
+                <td class="py-4 px-6 text-slate-500">{{ $emergencyReq->created_at->format('M d, H:i') }}</td>
                 <td class="py-4 px-6 space-x-2">
-                    <a href="{{ route('admin.requests.show', $request->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition" title="View Request">
+                    <a href="{{ route('admin.requests.show', $emergencyReq->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition" title="View Request">
                         <i class="fas fa-eye"></i>
                     </a>
-                    <a href="{{ route('admin.requests.show', $request->id) }}" class="inline-flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 px-3 py-2 text-xs font-semibold hover:bg-blue-100 transition" title="Deploy Responder">
+                    <a href="{{ route('admin.requests.show', $emergencyReq->id) }}" class="inline-flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 px-3 py-2 text-xs font-semibold hover:bg-blue-100 transition" title="Deploy Responder">
                         <i class="fas fa-rocket mr-2"></i>Deploy
                     </a>
                 </td>
