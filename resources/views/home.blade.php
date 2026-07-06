@@ -74,15 +74,9 @@
                         Access emergency services instantly. Request help, track responders, and stay connected with your loved ones during critical moments.
                     </p>
                     <div class="flex flex-wrap justify-center lg:justify-start gap-3">
-                        @auth
-                            <a href="{{ route('user.requests.new') }}" class="px-6 py-3 bg-white text-red-600 font-semibold rounded-xl hover:bg-gray-100 transition shadow-lg">
-                                <i class="fas fa-bolt mr-2"></i>Request Emergency
-                            </a>
-                        @else
-                            <a href="{{ route('register') }}" class="px-6 py-3 bg-white text-red-600 font-semibold rounded-xl hover:bg-gray-100 transition shadow-lg">
-                                <i class="fas fa-user-plus mr-2"></i>Create Account
-                            </a>
-                        @endauth
+                        <a href="{{ route('emergency') }}" class="px-6 py-3 bg-white text-red-600 font-semibold rounded-xl hover:bg-gray-100 transition shadow-lg">
+                            <i class="fas fa-bolt mr-2"></i>Request Emergency
+                        </a>
                         <a href="#features" class="px-6 py-3 bg-white/20 text-white font-semibold rounded-xl hover:bg-white/30 transition">
                             Learn More
                         </a>
@@ -126,7 +120,7 @@
 
         <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             <!-- Emergency Request -->
-            <a href="{{ auth()->check() ? route('user.requests.new') : route('login') }}"
+            <a href="{{ route('emergency') }}"
                class="group card-hover rounded-2xl border-2 border-red-100 bg-red-50 p-6 transition-all">
                 <div class="flex items-start justify-between">
                     <div class="w-14 h-14 rounded-xl gradient-bg flex items-center justify-center text-white text-xl shadow-lg shadow-red-500/30">

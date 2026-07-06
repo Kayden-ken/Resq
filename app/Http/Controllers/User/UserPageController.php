@@ -10,7 +10,9 @@ use App\Models\EmergencyType;
 use App\Models\Facility;
 use App\Models\MedicalInfo;
 use App\Models\Media;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class UserPageController extends Controller
@@ -38,14 +40,44 @@ class UserPageController extends Controller
 
     public function storeEmergencyRequest(Request $request)
     {
-        $request->validate([
+        // Check if user is authenticated
+        $isGuest = !$request->user();
+
+        // Validation rules
+        $rules = [
             'emergency_type_id' => ['required', 'exists:emergency_types,id'],
             'description' => ['required', 'string', 'max:2000'],
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
             'address' => ['nullable', 'string', 'max:500'],
-            'proof_image' => ['required', 'image', 'max:10240'], // 10MB max, required
-        ]);
+            'proof_image' => ['required', 'image', 'max:10240],
+        ];
+
+        // Additional validation for guests
+        if ($isGuest) {
+            $rules['guest_name'] = ['required', 'string', 'max:255'];
+            $rules['guest_phone'] = ['required', 'string', 'max:20'];
+        }
+
+        $request->validate($rules);
+
+        // Handle guest user or use authenticated user
+        if ($isGuest) {
+            // Create temporary guest user
+            $user = User::create([
+                'name' => $request->guest_name,
+                'email' => 'guest_' . time() . '@resq.local',
+                'password' => Hash::make(\Illuminate\Support\Str::random(16)),
+                'phone' => $request->guest_phone,
+                'user_type' => 'user',
+                'is_active' => true,
+                'email_verified_at' => now(),
+            ]);
+            $uploaderId = $user->id;
+        } else {
+            $user = $request->user();
+            $uploaderId = $user->id;
+        }
 
         // Handle image upload
         $imagePath = null;
@@ -56,7 +88,7 @@ class UserPageController extends Controller
         }
 
         $emergencyRequest = EmergencyRequest::create([
-            'requester_id' => $request->user()->id,
+            'requester_id' => $user->id,
             'emergency_type_id' => $request->emergency_type_id,
             'description' => $request->description,
             'latitude' => $request->latitude,
@@ -71,7 +103,7 @@ class UserPageController extends Controller
         if ($imagePath) {
             Media::create([
                 'incident_id' => $emergencyRequest->id,
-                'uploader_id' => $request->user()->id,
+                'uploader_id' => $uploaderId,
                 'media_type' => 'image',
                 'file_name' => $request->file('proof_image')->getClientOriginalName(),
                 'file_path' => $imagePath,
@@ -79,6 +111,11 @@ class UserPageController extends Controller
                 'mime_type' => $request->file('proof_image')->getMimeType(),
                 'description' => 'Proof image for emergency request',
             ]);
+        }
+
+        // Different response for guests
+        if ($isGuest) {
+            return redirect()->route('emergency')->with('success', 'Emergency request submitted successfully! Your reference number is: ' . $emergencyRequest->incident_number);
         }
 
         return redirect()->route('user.requests')->with('success', 'Emergency request submitted successfully.');

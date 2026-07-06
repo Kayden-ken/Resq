@@ -94,15 +94,19 @@ Route::post('/register', [RegisterController::class, 'register']);
 Route::get('/', [UserDashboardController::class, 'index'])->name('home');
 
 // ======================
-// USER ROUTES
+// PUBLIC EMERGENCY REQUEST (No login required)
+// ======================
+Route::get('/emergency', [UserPageController::class, 'emergencyForm'])->name('emergency');
+Route::post('/emergency', [UserPageController::class, 'storeEmergencyRequest'])->name('emergency.store');
+
+// ======================
+// USER ROUTES (Requires Login)
 // ======================
 Route::middleware('auth')->group(function () {
 
     Route::get('/profile', [UserPageController::class, 'profile'])->name('user.profile');
 
     Route::get('/requests', [UserPageController::class, 'emergencyRequests'])->name('user.requests');
-    Route::get('/requests/new', [UserPageController::class, 'emergencyForm'])->name('user.requests.new');
-    Route::post('/requests/new', [UserPageController::class, 'storeEmergencyRequest'])->name('user.requests.store');
 
     Route::get('/contacts', [UserPageController::class, 'contacts'])->name('user.contacts');
     Route::post('/contacts', [UserPageController::class, 'addContact']);

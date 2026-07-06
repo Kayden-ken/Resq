@@ -1,14 +1,20 @@
 @extends('layouts.app')
 
-@section('title', 'New Emergency Request - ResQ')
+@section('title', 'Emergency Request - ResQ')
 
 @section('content')
 <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8">
     <div class="mx-auto max-w-3xl px-4">
         <!-- Back Link -->
         <a href="{{ route('home') }}" class="inline-flex items-center gap-2 text-slate-600 hover:text-red-500 mb-4 transition">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
+            <i class="fas fa-arrow-left"></i> Back to Home
         </a>
+
+        @if(session('success'))
+        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-4">
+            <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+        </div>
+        @endif
 
         <!-- Form Card -->
         <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 sm:p-8">
@@ -18,12 +24,35 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-slate-800">Submit Emergency Request</h1>
-                    <p class="text-slate-500 text-sm">Fill in the details below</p>
+                    <p class="text-slate-500 text-sm">No account required - Request urgent help now</p>
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('user.requests.store') }}" enctype="multipart/form-data" class="space-y-5">
+            <form method="POST" action="{{ route('emergency.store') }}" enctype="multipart/form-data" class="space-y-5">
                 @csrf
+
+                @guest
+                <!-- Guest Contact Info -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
+                    <h3 class="font-semibold text-yellow-800 mb-3"><i class="fas fa-user mr-2"></i>Your Contact Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Your Name</label>
+                            <input type="text" name="guest_name" value="{{ old('guest_name') }}" class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none" placeholder="Enter your name" required>
+                            @error('guest_name')
+                                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+                            <input type="text" name="guest_phone" value="{{ old('guest_phone') }}" class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none" placeholder="+63xxxxxxxxxx" required>
+                            @error('guest_phone')
+                                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+                @endguest
 
                 <!-- Emergency Type -->
                 <div>
@@ -44,7 +73,7 @@
                 <!-- Description -->
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-2">Description</label>
-                    <textarea name="description" rows="4" class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" placeholder="Describe the emergency situation..." required></textarea>
+                    <textarea name="description" rows="4" class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" placeholder="Describe the emergency situation..." required>{{ old('description') }}</textarea>
                     @error('description')
                         <p class="mt-1.5 text-sm text-red-500">{{ $message }}</p>
                     @enderror
