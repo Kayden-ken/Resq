@@ -9,7 +9,9 @@ use App\Models\EmergencyRequest;
 use App\Models\EmergencyType;
 use App\Models\Facility;
 use App\Models\MedicalInfo;
+use App\Models\Media;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class UserPageController extends Controller
 {
@@ -42,9 +44,18 @@ class UserPageController extends Controller
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
             'address' => ['nullable', 'string', 'max:500'],
+            'proof_image' => ['required', 'image', 'max:10240'], // 10MB max, required
         ]);
 
-        EmergencyRequest::create([
+        // Handle image upload
+        $imagePath = null;
+        if ($request->hasFile('proof_image')) {
+            $file = $request->file('proof_image');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $imagePath = $file->storeAs('emergency_proofs', $filename, 'public');
+        }
+
+        $emergencyRequest = EmergencyRequest::create([
             'requester_id' => $request->user()->id,
             'emergency_type_id' => $request->emergency_type_id,
             'description' => $request->description,
@@ -55,6 +66,20 @@ class UserPageController extends Controller
             'is_sos' => false,
             'is_verified' => true,
         ]);
+
+        // Save proof image
+        if ($imagePath) {
+            Media::create([
+                'incident_id' => $emergencyRequest->id,
+                'uploader_id' => $request->user()->id,
+                'media_type' => 'image',
+                'file_name' => $request->file('proof_image')->getClientOriginalName(),
+                'file_path' => $imagePath,
+                'file_size' => $request->file('proof_image')->getSize(),
+                'mime_type' => $request->file('proof_image')->getMimeType(),
+                'description' => 'Proof image for emergency request',
+            ]);
+        }
 
         return redirect()->route('user.requests')->with('success', 'Emergency request submitted successfully.');
     }

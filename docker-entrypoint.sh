@@ -31,4 +31,7 @@ php artisan key:generate --force --no-interaction || true
 # Run migrations
 php artisan migrate --force --no-interaction || true
 
+# Run seeders
+php artisan db:seed --force --no-interaction || true
+
 exec apache2-foreground

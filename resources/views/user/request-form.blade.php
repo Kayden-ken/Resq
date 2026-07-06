@@ -30,9 +30,11 @@
                     <label class="block text-sm font-semibold text-slate-700 mb-2">Emergency Type</label>
                     <select name="emergency_type_id" class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" required>
                         <option value="">Select emergency type...</option>
-                        @foreach($emergencyTypes as $type)
+                        @forelse($emergencyTypes as $type)
                             <option value="{{ $type->id }}">{{ $type->name }}</option>
-                        @endforeach
+                        @empty
+                            <option value="">No emergency types available</option>
+                        @endforelse
                     </select>
                     @error('emergency_type_id')
                         <p class="mt-1.5 text-sm text-red-500">{{ $message }}</p>
@@ -44,6 +46,27 @@
                     <label class="block text-sm font-semibold text-slate-700 mb-2">Description</label>
                     <textarea name="description" rows="4" class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" placeholder="Describe the emergency situation..." required></textarea>
                     @error('description')
+                        <p class="mt-1.5 text-sm text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Proof Image -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Proof Image (Required)</label>
+                    <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-red-400 transition" id="upload-area">
+                        <input type="file" name="proof_image" id="proof_image" accept="image/*" class="hidden" required onchange="previewImage(event)">
+                        <label for="proof_image" class="cursor-pointer">
+                            <div id="preview-container" class="hidden mb-3">
+                                <img id="image-preview" src="" alt="Preview" class="max-h-48 mx-auto rounded-lg shadow-md">
+                            </div>
+                            <div id="upload-icon">
+                                <i class="fas fa-camera text-3xl text-slate-400 mb-2"></i>
+                                <p class="text-slate-500 text-sm">Click to upload photo proof</p>
+                                <p class="text-slate-400 text-xs mt-1">JPG, PNG or GIF (max 10MB)</p>
+                            </div>
+                        </label>
+                    </div>
+                    @error('proof_image')
                         <p class="mt-1.5 text-sm text-red-500">{{ $message }}</p>
                     @enderror
                 </div>
@@ -91,6 +114,19 @@
 </div>
 
 <script>
+function previewImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('image-preview').src = e.target.result;
+            document.getElementById('preview-container').classList.remove('hidden');
+            document.getElementById('upload-icon').classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
 function detectLocation() {
     const statusDiv = document.getElementById('location-status');
     const btn = document.getElementById('detect-btn');
