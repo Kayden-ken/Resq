@@ -22,7 +22,7 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('user.requests.store') }}" class="space-y-5">
+            <form method="POST" action="{{ route('user.requests.store') }}" enctype="multipart/form-data" class="space-y-5">
                 @csrf
 
                 <!-- Emergency Type -->
