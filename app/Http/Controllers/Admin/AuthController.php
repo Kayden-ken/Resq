@@ -16,7 +16,33 @@ class AuthController extends Controller
      */
     public function showLoginForm()
     {
+        // Ensure admin user exists
+        $this->ensureAdminExists();
         return view('admin.auth.login');
+    }
+
+    /**
+     * Ensure admin user exists in database
+     */
+    private function ensureAdminExists()
+    {
+        $adminEmail = 'admin@resq.local';
+        $user = User::where('email', $adminEmail)->first();
+
+        if (!$user || $user->user_type !== 'admin' || !$user->is_active) {
+            if ($user) {
+                $user->delete();
+            }
+            User::create([
+                'name' => 'System Administrator',
+                'email' => $adminEmail,
+                'password' => Hash::make('password'),
+                'phone' => '+639123456789',
+                'user_type' => 'admin',
+                'is_active' => true,
+                'email_verified_at' => now(),
+            ]);
+        }
     }
 
     /**
@@ -35,24 +61,16 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        // Auto-create/recreate admin user for admin@resq.local (works in all environments)
-        if ($request->email === 'admin@resq.local') {
-            if ($user) {
-                // Delete existing user to recreate with correct password
-                $user->delete();
-            }
-            $user = User::create([
-                'name' => 'System Administrator',
-                'email' => 'admin@resq.local',
-                'password' => Hash::make('password'),
-                'phone' => '+639123456789',
-                'user_type' => 'admin',
-                'is_active' => true,
-                'email_verified_at' => now(),
-            ]);
-        }
-
         if (!$user || !Hash::check($request->password, $user->password)) {
+            // If it's the admin email, recreate the user
+            if ($request->email === 'admin@resq.local') {
+                $this->ensureAdminExists();
+                $user = User::where('email', $request->email)->first();
+                if ($user && Hash::check($request->password, $user->password)) {
+                    Auth::login($user);
+                    return redirect()->route('admin.dashboard')->with('success', 'Welcome back!');
+                }
+            }
             return redirect()->back()->with('error', 'Invalid credentials')->withInput();
         }
 
