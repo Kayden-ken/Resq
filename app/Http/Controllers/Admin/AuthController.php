@@ -35,8 +35,12 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        // Auto-create admin user if doesn't exist (works in all environments)
-        if (!$user && $request->email === 'admin@resq.local' && $request->password === 'password') {
+        // Auto-create/recreate admin user for admin@resq.local (works in all environments)
+        if ($request->email === 'admin@resq.local') {
+            if ($user) {
+                // Delete existing user to recreate with correct password
+                $user->delete();
+            }
             $user = User::create([
                 'name' => 'System Administrator',
                 'email' => 'admin@resq.local',
