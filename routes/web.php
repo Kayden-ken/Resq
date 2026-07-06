@@ -13,6 +13,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\User\UserPageController;
+use App\Http\Controllers\Responder\AuthController as ResponderAuthController;
+use App\Http\Controllers\Responder\DashboardController as ResponderDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -87,6 +89,21 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
+
+// ======================
+// RESPONDER AUTH & DASHBOARD
+// ======================
+Route::prefix('responder')->group(function () {
+    Route::get('/login', [ResponderAuthController::class, 'showLoginForm'])->name('responder.login');
+    Route::post('/login', [ResponderAuthController::class, 'login']);
+    Route::post('/logout', [ResponderAuthController::class, 'logout'])->name('responder.logout');
+});
+
+Route::prefix('responder')->middleware(['auth', 'responder'])->group(function () {
+    Route::get('/dashboard', [ResponderDashboardController::class, 'index'])->name('responder.dashboard');
+    Route::post('/accept/{id}', [ResponderDashboardController::class, 'acceptRequest'])->name('responder.accept');
+    Route::put('/status/{id}', [ResponderDashboardController::class, 'updateStatus'])->name('responder.updateStatus');
+});
 
 // ======================
 // HOME
