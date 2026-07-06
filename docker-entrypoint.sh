@@ -2,12 +2,8 @@
 
 set -e
 
-echo "Running database migrations..."
-php artisan migrate --force
-
-echo "Seeding database..."
-php artisan db:seed --force
-
-echo "Migration and seeding finished."
+# Run migrations if possible (ignore errors)
+echo "Attempting migrations..."
+php artisan migrate --force --no-interaction || echo "Migration skipped or failed"
 
 exec apache2-foreground
