@@ -15,6 +15,8 @@ use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\User\UserPageController;
 use App\Http\Controllers\Responder\AuthController as ResponderAuthController;
 use App\Http\Controllers\Responder\DashboardController as ResponderDashboardController;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,9 +41,9 @@ Route::prefix('admin')->middleware('admin.auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     Route::get('/users', [UserController::class, 'index'])->name('admin.users');
-    Route::get('/users/{id}', [UserController::class, 'show'])->name('admin.users.show');
     Route::get('/users/create', [UserController::class, 'create'])->name('admin.users.create');
     Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
+    Route::get('/users/{id}', [UserController::class, 'show'])->name('admin.users.show');
     Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('admin.users.update');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('admin.users.destroy');
@@ -81,7 +83,7 @@ Route::prefix('admin')->middleware('admin.auth')->group(function () {
 });
 
 // ======================
-// AUTH (PUBLIC)
+// AUTH
 // ======================
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
@@ -91,7 +93,7 @@ Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->na
 Route::post('/register', [RegisterController::class, 'register']);
 
 // ======================
-// RESPONDER AUTH & DASHBOARD
+// RESPONDER
 // ======================
 Route::prefix('responder')->group(function () {
     Route::get('/login', [ResponderAuthController::class, 'showLoginForm'])->name('responder.login');
@@ -111,13 +113,13 @@ Route::prefix('responder')->middleware(['auth', 'responder'])->group(function ()
 Route::get('/', [UserDashboardController::class, 'index'])->name('home');
 
 // ======================
-// PUBLIC EMERGENCY REQUEST (No login required)
+// PUBLIC EMERGENCY
 // ======================
 Route::get('/emergency', [UserPageController::class, 'emergencyForm'])->name('emergency');
 Route::post('/emergency', [UserPageController::class, 'storeEmergencyRequest'])->name('emergency.store');
 
 // ======================
-// USER ROUTES (Requires Login)
+// USER ROUTES
 // ======================
 Route::middleware('auth')->group(function () {
 
@@ -125,29 +127,35 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/requests', [UserPageController::class, 'emergencyRequests'])->name('user.requests');
 
+    // NEW ROUTE
+    Route::get('/requests/new', [UserPageController::class, 'emergencyForm'])->name('user.requests.new');
+
     Route::get('/contacts', [UserPageController::class, 'contacts'])->name('user.contacts');
     Route::post('/contacts', [UserPageController::class, 'addContact']);
 
     Route::get('/facilities', [UserPageController::class, 'facilities'])->name('user.facilities');
+
     Route::get('/announcements', [UserPageController::class, 'announcements'])->name('user.announcements');
 });
 
 // ======================
-// DEBUG ROUTES (REMOVE AFTER FIX)
+// DEBUG ROUTES
 // ======================
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-
 Route::get('/debug-users', function () {
-    return \App\Models\User::select('id', 'email', 'user_type', 'is_active')->get();
+    return User::select('id', 'email', 'user_type', 'is_active')->get();
 });
 
 Route::get('/debug-login-test', function () {
+
     $email = request('email', 'admin@resq.local');
+
     $user = User::where('email', $email)->first();
 
     if (!$user) {
-        return ['found' => false, 'message' => 'User not found'];
+        return [
+            'found' => false,
+            'message' => 'User not found',
+        ];
     }
 
     return [

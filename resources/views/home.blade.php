@@ -241,7 +241,7 @@
                         <i class="fas fa-clipboard-check text-slate-400 text-2xl"></i>
                     </div>
                     <p class="text-slate-500">You don't have any recent requests</p>
-                    <a href="{{ route('user.requests.new') }}" class="mt-3 inline-block text-sm font-medium text-red-500 hover:text-red-600">
+                    <a href="{{ route('emergency') }}" class="mt-3 inline-block text-sm font-medium text-red-500 hover:text-red-600">
                         Make your first request <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>
