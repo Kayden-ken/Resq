@@ -115,23 +115,27 @@ Route::middleware('auth')->group(function () {
 // DEBUG ROUTES (REMOVE AFTER FIX)
 // ======================
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 Route::get('/debug-users', function () {
-    if (app()->environment('production')) {
-        abort(403);
-    }
-
-    return \App\Models\User::select('id', 'email', 'user_type')->get();
+    return \App\Models\User::select('id', 'email', 'user_type', 'is_active')->get();
 });
 
-Route::get('/debug-db', function () {
-    if (app()->environment('production')) {
-        abort(403);
+Route::get('/debug-login-test', function () {
+    $email = request('email', 'admin@resq.local');
+    $user = User::where('email', $email)->first();
+
+    if (!$user) {
+        return ['found' => false, 'message' => 'User not found'];
     }
 
     return [
-        'connection' => config('database.default'),
-        'database' => config('database.connections.pgsql.database'),
-        'host' => config('database.connections.pgsql.host'),
+        'found' => true,
+        'id' => $user->id,
+        'email' => $user->email,
+        'user_type' => $user->user_type,
+        'is_active' => $user->is_active,
+        'password_hash' => $user->password,
+        'password_check' => Hash::check('password', $user->password),
     ];
 });
