@@ -10,11 +10,11 @@ fi
 # Force set database connection to pgsql
 sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=pgsql/g' .env
 
-# Fix permissions for all storage directories
+# Fix permissions for ALL directories including sessions
 chown -R www-data:www-data /var/www/html/storage
 chmod -R 775 /var/www/html/storage
 
-# Create all required directories
+# Create all required directories with proper permissions
 mkdir -p /var/www/html/storage/framework/cache
 mkdir -p /var/www/html/storage/framework/sessions
 mkdir -p /var/www/html/storage/framework/views
