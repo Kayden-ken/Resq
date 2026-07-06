@@ -4,6 +4,11 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
+// Force PostgreSQL if not set
+if (!getenv('DB_CONNECTION') && !env('DB_CONNECTION')) {
+    putenv('DB_CONNECTION=pgsql');
+}
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         api: __DIR__.'/../routes/api.php',
