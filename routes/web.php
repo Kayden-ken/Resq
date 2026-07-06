@@ -117,54 +117,6 @@ Route::middleware('auth')->group(function () {
 use App\Models\User;
 
 Route::get('/debug-users', function () {
-
-    if (app()->environment('production')) {
-        abort(403, 'Forbidden');
-    }
-
-    return User::select('id', 'email', 'user_type')->get();
-});
-
-Route::get('/debug-db', function () {
-
-    if (app()->environment('production')) {
-        abort(403, 'Forbidden');
-    }
-
-    return [
-        'connection' => config('database.default'),
-        'database' => config('database.connections.pgsql.database'),
-        'host' => config('database.connections.pgsql.host'),
-        'username' => config('database.connections.pgsql.username'),
-    ];
-});
-use App\Models\User;
-
-Route::get('/debug-users', function () {
-
-    // Block access in production
-    if (app()->environment('production')) {
-        abort(403, 'Forbidden');
-    }
-
-    return User::select('id', 'email', 'user_type')->get();
-});
-
-Route::get('/debug-db', function () {
-
-    // Block access in production
-    if (app()->environment('production')) {
-        abort(403, 'Forbidden');
-    }
-
-    return [
-        'connection' => config('database.default'),
-        'database' => config('database.connections.pgsql.database'),
-        'host' => config('database.connections.pgsql.host'),
-    ];
-});
-Route::get('/debug-users', function () {
-
     if (app()->environment('production')) {
         abort(403);
     }
@@ -173,7 +125,6 @@ Route::get('/debug-users', function () {
 });
 
 Route::get('/debug-db', function () {
-
     if (app()->environment('production')) {
         abort(403);
     }
