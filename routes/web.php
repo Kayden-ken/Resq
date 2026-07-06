@@ -163,3 +163,24 @@ Route::get('/debug-db', function () {
         'host' => config('database.connections.pgsql.host'),
     ];
 });
+Route::get('/debug-users', function () {
+
+    if (app()->environment('production')) {
+        abort(403);
+    }
+
+    return \App\Models\User::select('id', 'email', 'user_type')->get();
+});
+
+Route::get('/debug-db', function () {
+
+    if (app()->environment('production')) {
+        abort(403);
+    }
+
+    return [
+        'connection' => config('database.default'),
+        'database' => config('database.connections.pgsql.database'),
+        'host' => config('database.connections.pgsql.host'),
+    ];
+});
